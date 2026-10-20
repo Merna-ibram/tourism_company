@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_vehicle_vehicle_tree" model="ir.ui.view">
+        <field name="name">vehicle.vehicle.tree</field>
+        <field name="model">vehicle.vehicle</field>
+        <field name="arch" type="xml">
+            <tree string="السيارات"
+                  decoration-danger="state == 'out_of_service'"
+                  decoration-info="state == 'on_trip'">
+                <field name="plate_number"/>
+                <field name="vehicle_type"/>
+                <field name="model_name"/>
+                <field name="manufacture_year"/>
+                <field name="color" optional="show"/>
+                <field name="seats_count" optional="hide"/>
+<!--                <field name="driver_name"/>-->
+                <field name="state" widget="badge"
+                       decoration-success="state == 'available'"
+                       decoration-info="state == 'on_trip'"
+                       decoration-danger="state == 'out_of_service'"/>
+                <field name="license_expiry_date" optional="show"/>
+                <field name="insurance_expiry_date" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_vehicle_vehicle_form" model="ir.ui.view">
+        <field name="name">vehicle.vehicle.form</field>
+        <field name="model">vehicle.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="سيارة">
+                <sheet>
+                    <!-- Smart buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_maintenance" type="object"
+                                class="oe_stat_button" icon="fa-wrench">
+                            <field name="maintenance_count" widget="statinfo"
+                                   string="الصيانة الشهرية"/>
+                        </button>
+                        <button name="action_open_handover" type="object"
+                                class="oe_stat_button" icon="fa-clipboard">
+                            <field name="handover_count" widget="statinfo"
+                                   string="صيانة قبل الاستلام"/>
+                        </button>
+                    </div>
+
+                    <field name="active" invisible="1"/>
+                    <widget name="web_ribbon" title="مؤرشفة" bg_color="text-bg-danger" invisible="active"/>
+
+                    <div class="alert alert-danger" role="alert"
+                         invisible="license_alert_state != 'expired'">
+                        رخصة العربية منتهية!
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="license_alert_state != 'soon'">
+                        رخصة العربية تنتهي خلال <field name="license_days_left" class="oe_inline"/> يوم.
+                    </div>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="insurance_alert_state != 'expired'">
+                        تأمين العربية منتهي!
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="insurance_alert_state != 'soon'">
+                        تأمين العربية ينتهي خلال <field name="insurance_days_left" class="oe_inline"/> يوم.
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="plate_number"/>
+                        <h1><field name="plate_number" placeholder="رقم العربية"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="بيانات السيارة">
+                            <field name="vehicle_type"/>
+                            <field name="model_name"/>
+                            <field name="manufacture_year" placeholder="مثال: 2024"/>
+                            <field name="color"/>
+                            <field name="seats_count"/>
+                        </group>
+                        <group string="بيانات إضافية">
+                            <field name="chassis_number"/>
+                            <field name="motor_number"/>
+                            <field name="purchase_date"/>
+<!--                            <field name="driver_name"/>-->
+                        </group>
+                    </group>
+
+                    <group string="حالة العربية">
+                        <div colspan="2" class="d-flex gap-5">
+                            <div class="o_row">
+                                <field name="is_available"/>
+                                <label for="is_available"/>
+                            </div>
+                            <div class="o_row">
+                                <field name="is_on_trip"/>
+                                <label for="is_on_trip"/>
+                            </div>
+                            <div class="o_row">
+                                <field name="is_out_of_service"/>
+                                <label for="is_out_of_service"/>
+                            </div>
+                        </div>
+                        <field name="state" invisible="1"/>
+                        <field name="license_alert_state" invisible="1"/>
+                        <field name="insurance_alert_state" invisible="1"/>
+                    </group>
+
+
+                    <notebook>
+                        <page string="الرخصة" name="license">
+                            <group>
+                                <group>
+                                    <field name="license_number"/>
+                                    <field name="license_issue_date"/>
+                                    <field name="license_expiry_date"/>
+                                </group>
+                                <group>
+                                    <field name="license_alert_state" widget="badge"
+                                           decoration-success="license_alert_state == 'ok'"
+                                           decoration-warning="license_alert_state == 'soon'"
+                                           decoration-danger="license_alert_state == 'expired'"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="التأمين" name="insurance">
+                            <group>
+                                <group>
+                                    <field name="insurance_company"/>
+                                    <field name="insurance_number"/>
+                                    <field name="insurance_start_date"/>
+                                    <field name="insurance_expiry_date"/>
+                                </group>
+                                <group>
+                                    <field name="insurance_alert_state" widget="badge"
+                                           decoration-success="insurance_alert_state == 'ok'"
+                                           decoration-warning="insurance_alert_state == 'soon'"
+                                           decoration-danger="insurance_alert_state == 'expired'"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_vehicle_vehicle_search" model="ir.ui.view">
+        <field name="name">vehicle.vehicle.search</field>
+        <field name="model">vehicle.vehicle</field>
+        <field name="arch" type="xml">
+            <search string="بحث في السيارات">
+                <field name="plate_number"/>
+                <field name="model_name"/>
+<!--                <field name="driver_name"/>-->
+                <field name="chassis_number"/>
+                <field name="motor_number"/>
+                <separator/>
+                <filter name="f_available" string="متاحة" domain="[('state', '=', 'available')]"/>
+                <filter name="f_on_trip" string="في رحلة" domain="[('state', '=', 'on_trip')]"/>
+                <filter name="f_out" string="خارج الخدمة" domain="[('state', '=', 'out_of_service')]"/>
+                <separator/>
+                <filter name="f_license_soon" string="رخصة تنتهي خلال شهر"
+                        domain="[('license_expiry_date', '!=', False),
+                                 ('license_expiry_date', '&lt;=', (context_today() + relativedelta(months=1)).strftime('%Y-%m-%d'))]"/>
+                <filter name="f_insurance_soon" string="تأمين ينتهي خلال شهر"
+                        domain="[('insurance_expiry_date', '!=', False),
+                                 ('insurance_expiry_date', '&lt;=', (context_today() + relativedelta(months=1)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter name="f_archived" string="مؤرشفة" domain="[('active', '=', False)]"/>
+                <group expand="0" string="تجميع حسب">
+                    <filter name="g_type" string="النوع" context="{'group_by': 'vehicle_type'}"/>
+                    <filter name="g_state" string="الحالة" context="{'group_by': 'state'}"/>
+                    <filter name="g_color" string="اللون" context="{'group_by': 'color'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action + Menus -->
+    <record id="action_vehicle_vehicle" model="ir.actions.act_window">
+        <field name="name">السيارات</field>
+        <field name="res_model">vehicle.vehicle</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_vehicle_vehicle_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">سجّل أول مركبة</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_tourism_company_root" name="شركة السياحة" sequence="20"
+              web_icon="base,static/description/icon.png"/>
+    <menuitem id="menu_vehicle_vehicles" name="السيارات" parent="menu_tourism_company_root"
+              action="action_vehicle_vehicle" sequence="20"/>
+
+</odoo>

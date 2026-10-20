@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_vehicle_vehicle_user,vehicle.vehicle.user,model_vehicle_vehicle,base.group_user,1,1,1,1
+access_driver_profile_user,driver.profile user,model_driver_profile,base.group_user,1,1,1,1
+access_vehicle_maintenance_user,vehicle.maintenance.user,model_vehicle_maintenance,base.group_user,1,1,1,1
+access_vehicle_handover,vehicle.handover,model_vehicle_handover,base.group_user,1,1,1,1
+access_vehicle_handover_line,vehicle.handover.line,model_vehicle_handover_line,base.group_user,1,1,1,1
+access_trip_order,access_trip_order,model_trip_order,base.group_user,1,1,1,1
+access_trip_dashboard,trip.dashboard,model_trip_dashboard,base.group_user,1,1,1,1
+access_trip_monthly_report_wizard,trip.monthly.report.wizard,model_trip_monthly_report_wizard,base.group_user,1,1,1,1

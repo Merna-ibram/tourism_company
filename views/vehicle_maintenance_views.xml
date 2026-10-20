@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_vehicle_maintenance_tree" model="ir.ui.view">
+        <field name="name">vehicle.maintenance.tree</field>
+        <field name="model">vehicle.maintenance</field>
+        <field name="arch" type="xml">
+            <tree string="الصيانة الشهرية"
+                  decoration-danger="next_alert_state == 'overdue'"
+                  decoration-warning="next_alert_state == 'soon'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="vehicle_id"/>
+                <field name="maintenance_date"/>
+                <field name="maintenance_type"/>
+                <field name="maintenance_center"/>
+                <field name="cost" sum="الإجمالي"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'planned'"
+                       decoration-warning="state == 'in_progress'"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'cancelled'"/>
+                <field name="next_maintenance_date"/>
+                <field name="next_alert_state" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_vehicle_maintenance_form" model="ir.ui.view">
+        <field name="name">vehicle.maintenance.form</field>
+        <field name="model">vehicle.maintenance</field>
+        <field name="arch" type="xml">
+            <form string="صيانة">
+                <header>
+                    <button name="%(action_report_vehicle_maintenance)d" type="action"
+                            string="طباعة التقرير" class="btn-primary" icon="fa-print"
+                            invisible="not id"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-danger" role="alert"
+                         invisible="next_alert_state != 'overdue'">
+                        موعد الصيانة القادمة فات!
+                    </div>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="next_alert_state != 'soon'">
+                        الصيانة القادمة بعد <field name="next_days_left" class="oe_inline"/> يوم.
+                    </div>
+                    <field name="next_alert_state" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="reminder_sent" invisible="1"/>
+
+                    <div class="oe_title">
+                        <label for="vehicle_id"/>
+                        <h1>
+                            <field name="vehicle_locked" invisible="1"/>
+                            <field name="vehicle_id" readonly="id or vehicle_locked" force_save="1"
+                                   options="{'no_open': True, 'no_create': True}"/>
+                        </h1>
+                    </div>
+
+                    <group string="حالة الصيانة">
+                        <div colspan="2" class="d-flex gap-5">
+                            <div class="o_row">
+                                <field name="is_planned"/>
+                                <label for="is_planned"/>
+                            </div>
+                            <div class="o_row">
+                                <field name="is_in_progress"/>
+                                <label for="is_in_progress"/>
+                            </div>
+                            <div class="o_row">
+                                <field name="is_done"/>
+                                <label for="is_done"/>
+                            </div>
+                            <div class="o_row">
+                                <field name="is_cancelled"/>
+                                <label for="is_cancelled"/>
+                            </div>
+                        </div>
+                        <field name="state" invisible="1"/>
+                    </group>
+
+                    <group>
+                        <group string="بيانات الصيانة">
+                            <field name="maintenance_date"/>
+                            <field name="maintenance_type"/>
+                            <field name="maintenance_center"/>
+                            <field name="cost"/>
+                        </group>
+                        <group string="الصيانة القادمة">
+                            <field name="next_maintenance_date"/>
+                        </group>
+                    </group>
+                    <group string="المشكلة">
+                        <field name="problem" nolabel="1" colspan="2" rows="6"
+                               placeholder="اكتبي وصف المشكلة هنا..."/>
+                    </group>
+                    <group string="قطع الغيار">
+                        <field name="spare_parts" nolabel="1" colspan="2" rows="6"
+                               placeholder="اكتبي قطع الغيار المستخدمة هنا..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_vehicle_maintenance_search" model="ir.ui.view">
+        <field name="name">vehicle.maintenance.search</field>
+        <field name="model">vehicle.maintenance</field>
+        <field name="arch" type="xml">
+            <search string="بحث في الصيانة">
+                <field name="vehicle_id"/>
+                <field name="maintenance_center"/>
+                <separator/>
+                <filter name="f_planned" string="مخططة" domain="[('state', '=', 'planned')]"/>
+                <filter name="f_progress" string="جارية" domain="[('state', '=', 'in_progress')]"/>
+                <filter name="f_done" string="تمت" domain="[('state', '=', 'done')]"/>
+                <filter name="f_cancelled" string="ملغاة" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="0" string="تجميع حسب">
+                    <filter name="g_vehicle" string="العربية" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="g_state" string="الحالة" context="{'group_by': 'state'}"/>
+                    <filter name="g_type" string="نوع الصيانة" context="{'group_by': 'maintenance_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action + Menu: الصيانة الشهرية -->
+    <record id="action_vehicle_maintenance_menu" model="ir.actions.act_window">
+        <field name="name">الصيانة الشهرية</field>
+        <field name="res_model">vehicle.maintenance</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_vehicle_maintenance_search"/>
+    </record>
+
+    <!-- يظهر في قائمة Action داخل شاشة السيارة، والسيارة تتحدد تلقائياً -->
+    <record id="action_vehicle_maintenance_menu_from_vehicle" model="ir.actions.act_window">
+        <field name="name">الصيانة الشهرية</field>
+        <field name="res_model">vehicle.maintenance</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'default_vehicle_id': active_id}</field>
+        <field name="binding_model_id" ref="model_vehicle_vehicle"/>
+        <field name="binding_view_types">form</field>
+    </record>
+
+    <menuitem id="menu_vehicle_maintenance_monthly"
+              name="الصيانة الشهرية"
+              parent="menu_tourism_company_root"
+              action="action_vehicle_maintenance_menu"
+              sequence="40"/>
+
+</odoo>

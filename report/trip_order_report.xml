@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- إجراء الطباعة -->
+    <record id="action_report_trip_order" model="ir.actions.report">
+        <field name="name">طباعة أمر التشغيل</field>
+        <field name="model">trip.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vehicle_profile.report_trip_order_document</field>
+        <field name="report_file">vehicle_profile.report_trip_order_document</field>
+        <field name="print_report_name">'أمر تشغيل - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="model_trip_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- قالب الطباعة -->
+    <template id="report_trip_order_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="direction: rtl; text-align: right;">
+
+                        <!-- العنوان ورقم الرحلة -->
+                        <table style="width: 100%; margin-bottom: 20px;">
+                            <tr>
+                                <td style="width: 50%; text-align: right;">
+                                    <h2 style="margin: 0;">أمر تشغيل</h2>
+                                </td>
+                                <td style="width: 50%; text-align: left;">
+                                    <h3 style="margin: 0; color: #c0392b;">
+                                        <span t-field="o.name"/>
+                                    </h3>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- بيانات الرحلة -->
+                        <table class="table table-bordered" style="width: 100%;">
+                            <tr>
+                                <th style="width: 20%; background-color: #f2f2f2;">اسم السائق</th>
+                                <td style="width: 30%;"><span t-field="o.driver_id"/></td>
+                                <th style="width: 20%; background-color: #f2f2f2;">العربية</th>
+                                <td style="width: 30%;"><span t-field="o.vehicle_id"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">تاريخ الرحلة</th>
+                                <td><span t-field="o.trip_date"/></td>
+                                <th style="background-color: #f2f2f2;">عدد الركاب</th>
+                                <td><span t-field="o.passengers_count"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">نقطة البداية</th>
+                                <td><span t-field="o.start_point"/></td>
+                                <th style="background-color: #f2f2f2;">الوجهة</th>
+                                <td><span t-field="o.destination"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">وقت التحرك</th>
+                                <td><span t-field="o.departure_datetime"/></td>
+                                <th style="background-color: #f2f2f2;">وقت الوصول</th>
+                                <td><span t-field="o.arrival_datetime"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">العداد عند الخروج</th>
+                                <td><span t-field="o.odometer_start"/></td>
+                                <th style="background-color: #f2f2f2;">العداد عند الدخول</th>
+                                <td><span t-field="o.odometer_end"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">عدد الكيلومترات</th>
+                                <td><span t-field="o.distance"/></td>
+                                <th style="background-color: #f2f2f2;">كمية الوقود (لتر)</th>
+                                <td><span t-field="o.fuel_consumed"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">محطة البنزين</th>
+                                <td><span t-field="o.fuel_station"/></td>
+                                <th style="background-color: #f2f2f2;">إجمالي تكلفة الوقود</th>
+                                <td><span t-field="o.fuel_total"/></td>
+                            </tr>
+                            <tr>
+                                <th style="background-color: #f2f2f2;">حالة الرحلة</th>
+                                <td colspan="3"><span t-field="o.state"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- ملاحظات -->
+                        <t t-if="o.note">
+                            <p><strong>ملاحظات:</strong> <span t-field="o.note"/></p>
+                        </t>
+
+                        <!-- التوقيعات -->
+                        <table style="width: 100%; margin-top: 60px; text-align: center;">
+                            <tr>
+                                <td style="width: 33%;">رئيس الحركة</td>
+                                <td style="width: 33%;">السائق</td>
+                                <td style="width: 33%;">مراجعة إدارة التشغيل</td>
+                            </tr>
+                            <tr>
+                                <td style="padding-top: 40px;">..............................</td>
+                                <td style="padding-top: 40px;">..............................</td>
+                                <td style="padding-top: 40px;">..............................</td>
+                            </tr>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

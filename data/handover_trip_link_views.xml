@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- إضافة زر فتح أمر التشغيل وحقل الربط في شاشة الصيانة قبل الاستلام -->
+    <record id="view_vehicle_handover_form_trip_link" model="ir.ui.view">
+        <field name="name">vehicle.handover.form.trip.link</field>
+        <field name="model">vehicle.handover</field>
+        <field name="inherit_id" ref="view_vehicle_handover_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//header" position="inside">
+                <button name="action_save_open_trip"
+                        string="حفظ وفتح أمر التشغيل"
+                        type="object"
+                        class="btn-primary"/>
+            </xpath>
+
+            <xpath expr="//field[@name='vehicle_locked']" position="after">
+                <field name="trip_id" invisible="1" force_save="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- قائمة السائقين -->
+    <record id="view_driver_profile_tree" model="ir.ui.view">
+        <field name="name">driver.profile.list</field>
+        <field name="model">driver.profile</field>
+        <field name="arch" type="xml">
+            <tree string="السائقون">
+                <field name="name"/>
+                <field name="mobile"/>
+                <field name="license_number"/>
+                <field name="license_expiry_date"/>
+                <field name="vehicle_id"/>
+
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'available'"
+                       decoration-info="state == 'on_trip'"
+                       decoration-warning="state == 'off'"
+                       decoration-danger="state == 'suspended'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- نموذج ملف السائق -->
+    <record id="view_driver_profile_form" model="ir.ui.view">
+        <field name="name">driver.profile.form</field>
+        <field name="model">driver.profile</field>
+        <field name="arch" type="xml">
+            <form string="ملف السائق">
+                <sheet>
+
+                    <!-- اسم السائق -->
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="اكتب اسم السائق"/>
+                        </h1>
+                    </div>
+
+                    <!-- حالة السائق: اختيار حالة واحدة فقط -->
+                    <group string="حالة السائق">
+                        <field name="state"
+                               widget="radio"
+                               colspan="2"
+                               class="d-flex flex-wrap gap-4"
+                               options="{'horizontal': True}"
+                               nolabel="1"/>
+                    </group>
+
+                    <!-- البيانات الأساسية -->
+                    <group>
+                        <group string="بيانات السائق">
+
+                            <field name="image_1920"
+                                   widget="image"
+                                   class="oe_avatar"
+                                   options="{'preview_image': 'image_1920'}"/>
+
+                            <field name="national_id"/>
+
+                            <!-- رقم الموبايل -->
+                            <field name="mobile"
+                                   widget="phone"
+                                   options="{'maxlength': 11}"/>
+
+                            <field name="hire_date"/>
+
+                        </group>
+
+                        <!-- بيانات الرخصة -->
+                        <group string="بيانات الرخصة">
+                            <field name="license_number"/>
+                            <field name="license_type"/>
+                            <field name="license_expiry_date"/>
+
+                            <field name="license_days_left"
+                                   readonly="1"/>
+
+                            <field name="license_alert_state"
+                                   readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- ربط السائق بالعربية -->
+                    <group string="ربط السائق بالعربية">
+                        <field name="vehicle_id"
+                               options="{'no_create': False}"/>
+                    </group>
+
+                    <!-- تنبيه اقتراب انتهاء الرخصة -->
+                    <div class="alert alert-warning"
+                         role="alert"
+                         invisible="license_alert_state != 'soon'">
+                        رخصة السائق ستنتهي خلال شهر.
+                        يرجى التجديد.
+                    </div>
+
+                    <!-- تنبيه انتهاء الرخصة -->
+                    <div class="alert alert-danger"
+                         role="alert"
+                         invisible="license_alert_state != 'expired'">
+                        رخصة السائق منتهية.
+                        يرجى تجديدها قبل إسناد رحلة جديدة.
+                    </div>
+
+                    <chatter/>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- إجراء فتح السائقين -->
+    <record id="action_driver_driver" model="ir.actions.act_window">
+        <field name="name">السائق</field>
+        <field name="res_model">driver.profile</field>
+        <field name="view_mode">tree,form</field>
+
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                أضيفي أول سائق
+            </p>
+            <p>
+                سجلي بيانات السائق والرخصة
+                ثم اربطيه بالعربية المناسبة.
+            </p>
+        </field>
+    </record>
+
+    <!-- قائمة السائقين في التطبيق -->
+    <menuitem id="menu_driver_drivers"
+              name="السائق"
+              parent="menu_tourism_company_root"
+              action="action_driver_driver"
+              sequence="30"/>
+
+</odoo>

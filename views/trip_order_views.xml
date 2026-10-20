@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- نموذج أمر التشغيل -->
+    <record id="view_trip_order_form" model="ir.ui.view">
+        <field name="name">trip.order.form</field>
+        <field name="model">trip.order</field>
+        <field name="arch" type="xml">
+            <form string="أمر التشغيل">
+                <header>
+                    <button name="%(action_report_trip_order)d"
+                            string="طباعة"
+                            type="action"
+                            class="btn-primary"
+                            icon="fa-print"
+                            invisible="not id"/>
+                    <button name="action_open_handover"
+                            string="حفظ وفتح الصيانة قبل الاستلام"
+                            type="object"
+                            class="btn-primary"
+                            invisible="handover_id"/>
+                    <button name="action_open_handover"
+                            string="فتح الصيانة قبل الاستلام"
+                            type="object"
+                            invisible="not handover_id"/>
+                    <button name="action_confirm" string="تأكيد" type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_done" string="إنهاء الرحلة" type="object"
+                            class="btn-primary"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_cancel" string="إلغاء" type="object"
+                            invisible="state not in ('draft', 'confirmed')"
+                            confirm="هل تريدين إلغاء هذه الرحلة؟"/>
+                    <button name="action_draft" string="رجوع لمسودة" type="object"
+                            invisible="state not in ('confirmed', 'cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,confirmed,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+
+                    <!-- حقول مخفية بتحدد العربيات والسواقين المتاحين في الفترة المختارة -->
+                    <field name="available_vehicle_ids" invisible="1"/>
+                    <field name="available_driver_ids" invisible="1"/>
+
+                    <!-- خط السير والمواعيد الأول، عشان القوائم تتفلتر على الفترة -->
+                    <group>
+                        <group string="خط السير والمواعيد">
+                            <field name="trip_date" readonly="state != 'draft'"/>
+                            <field name="departure_datetime" readonly="state != 'draft'"/>
+                            <field name="arrival_datetime" readonly="state != 'draft'"/>
+                            <field name="start_point" readonly="state != 'draft'"/>
+                            <field name="destination" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="بيانات الرحلة">
+                            <field name="vehicle_id"
+                                   readonly="state != 'draft' or handover_id"
+                                   force_save="1"
+                                   domain="[('id', 'in', available_vehicle_ids)]"
+                                   options="{'no_create': True}"/>
+                            <field name="driver_id"
+                                   readonly="state != 'draft' or handover_id"
+                                   force_save="1"
+                                   domain="[('id', 'in', available_driver_ids)]"
+                                   options="{'no_create': True}"/>
+                            <field name="passengers_count"
+                                   readonly="state in ('done', 'cancelled')"/>
+                            <field name="handover_id" force_save="1"
+                                   options="{'no_create': True}"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="العداد">
+                            <field name="odometer_start"
+                                   readonly="state in ('done', 'cancelled')"/>
+                            <field name="odometer_end"
+                                   readonly="state != 'confirmed'"/>
+                            <field name="distance"/>
+                        </group>
+                        <group string="الوقود">
+                            <field name="fuel_consumed"
+                                   readonly="state != 'confirmed'"/>
+                            <field name="fuel_price"
+                                   readonly="state != 'confirmed'"/>
+                            <field name="fuel_station"
+                                   readonly="state != 'confirmed'"/>
+                            <field name="fuel_total"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="note" placeholder="ملاحظات..."
+                               readonly="state in ('done', 'cancelled')"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- قائمة الرحلات -->
+    <record id="view_trip_order_tree" model="ir.ui.view">
+        <field name="name">trip.order.tree</field>
+        <field name="model">trip.order</field>
+        <field name="arch" type="xml">
+            <tree string="الرحلات">
+                <field name="name"/>
+                <field name="trip_date"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="start_point"/>
+                <field name="destination"/>
+                <field name="departure_datetime"/>
+                <field name="arrival_datetime"/>
+                <field name="passengers_count"/>
+                <field name="distance"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-muted="state == 'draft'"
+                       decoration-info="state == 'confirmed'"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- البحث والتجميع -->
+    <record id="view_trip_order_search" model="ir.ui.view">
+        <field name="name">trip.order.search</field>
+        <field name="model">trip.order</field>
+        <field name="arch" type="xml">
+            <search string="بحث في الرحلات">
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <separator/>
+                <filter name="filter_draft" string="مسودة" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_confirmed" string="مؤكدة" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="filter_done" string="منتهية" domain="[('state', '=', 'done')]"/>
+                <filter name="filter_cancelled" string="ملغاة" domain="[('state', '=', 'cancelled')]"/>
+                <group expand="0" string="تجميع حسب">
+                    <filter name="group_state" string="الحالة" context="{'group_by': 'state'}"/>
+                    <filter name="group_vehicle" string="العربية" context="{'group_by': 'vehicle_id'}"/>
+                    <filter name="group_driver" string="السائق" context="{'group_by': 'driver_id'}"/>
+                    <filter name="group_destination" string="الوجهة" context="{'group_by': 'destination'}"/>
+                    <filter name="group_date" string="تاريخ الرحلة" context="{'group_by': 'trip_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- الإجراء -->
+    <record id="action_trip_order" model="ir.actions.act_window">
+        <field name="name">أمر التشغيل</field>
+        <field name="res_model">trip.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                أضيفي أول أمر تشغيل
+            </p>
+            <p>
+                اختاري العربية والسائق وحددي خط السير والمواعيد.
+            </p>
+        </field>
+    </record>
+
+    <!-- القائمة -->
+    <menuitem id="menu_trip_order"
+              name="أمر التشغيل"
+              parent="menu_tourism_company_root"
+              action="action_trip_order"
+              sequence="60"/>
+
+</odoo>

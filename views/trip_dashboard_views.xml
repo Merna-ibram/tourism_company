@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- شاشة الـ Dashboard -->
+    <record id="view_trip_dashboard_form" model="ir.ui.view">
+        <field name="name">trip.dashboard.form</field>
+        <field name="model">trip.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="لوحة المعلومات" create="0" delete="0" duplicate="0">
+                <header>
+                    <button name="action_print_monthly"
+                            string="طباعة تقرير شهري"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-print"/>
+                    <button name="action_refresh"
+                            string="تحديث"
+                            type="object"
+                            icon="fa-refresh"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>لوحة المعلومات</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="period_type" widget="radio"
+                                   options="{'horizontal': true}"/>
+                        </group>
+                        <group invisible="period_type != 'month'">
+                            <field name="month"
+                                   required="period_type == 'month'"
+                                   options="{'no_open': true}"/>
+                            <field name="year"
+                                   required="period_type == 'month'"
+                                   options="{'no_open': true}"/>
+                        </group>
+                    </group>
+                    <field name="dashboard_html" nolabel="1" readonly="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- نافذة اختيار الشهر قبل الطباعة -->
+    <record id="view_trip_monthly_report_wizard_form" model="ir.ui.view">
+        <field name="name">trip.monthly.report.wizard.form</field>
+        <field name="model">trip.monthly.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="طباعة تقرير شهري">
+                <group>
+                    <field name="month" required="1"/>
+                    <field name="year" required="1"/>
+                </group>
+                <footer>
+                    <button name="action_print" string="طباعة"
+                            type="object" class="btn-primary"
+                            icon="fa-print" data-hotkey="q"/>
+                    <button string="إلغاء" class="btn-secondary"
+                            special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_trip_dashboard" model="ir.actions.server">
+        <field name="name">لوحة المعلومات</field>
+        <field name="model_id" ref="model_trip_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_dashboard()</field>
+    </record>
+
+    <menuitem id="menu_trip_dashboard"
+              name="لوحة المعلومات"
+              parent="menu_tourism_company_root"
+              action="action_trip_dashboard"
+              sequence="10"/>
+
+</odoo>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_report_trip_monthly" model="ir.actions.report">
+        <field name="name">التقرير الشهري</field>
+        <field name="model">trip.monthly.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vehicle_profile.report_trip_monthly</field>
+        <field name="report_file">vehicle_profile.report_trip_monthly</field>
+        <field name="print_report_name">'تقرير شهري - %s' % object.month</field>
+    </record>
+
+    <template id="report_trip_monthly">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page" dir="rtl" style="text-align:right;font-size:13px;">
+
+                        <h2 style="text-align:center;margin-bottom:2px;">
+                            التقرير الشهري للتشغيل
+                        </h2>
+                        <p style="text-align:center;margin-bottom:18px;">
+                            <t t-esc="company_name"/> — <b t-esc="period_label"/>
+                        </p>
+
+                        <!-- الملخص -->
+                        <h4>الملخص</h4>
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <th>إجمالي الرحلات</th><td t-esc="data['totals']['trips_all']"/>
+                                <th>مؤكدة</th><td t-esc="data['totals']['confirmed']"/>
+                                <th>منتهية</th><td t-esc="data['totals']['done']"/>
+                                <th>ملغاة</th><td t-esc="data['totals']['cancelled']"/>
+                            </tr>
+                            <tr>
+                                <th>إجمالي الكيلومترات</th><td t-esc="fmt(data['totals']['km'])"/>
+                                <th>عدد الركاب</th><td t-esc="fmt(data['totals']['passengers'])"/>
+                                <th>وقود (لتر)</th><td t-esc="fmt(data['totals']['fuel_liters'])"/>
+                                <th>صيانة قبل الاستلام</th><td t-esc="data['totals']['handover_count']"/>
+                            </tr>
+                            <tr>
+                                <th>تكلفة الوقود</th>
+                                <td><t t-esc="fmt(data['totals']['fuel_cost'])"/> <t t-esc="currency"/></td>
+                                <th>تكلفة الصيانة</th>
+                                <td><t t-esc="fmt(data['totals']['maint_cost'])"/> <t t-esc="currency"/></td>
+                                <th>إجمالي التكاليف</th>
+                                <td><t t-esc="fmt(data['totals']['total_cost'])"/> <t t-esc="currency"/></td>
+                                <th>التكلفة لكل كم</th>
+                                <td t-esc="fmt(data['totals']['cost_per_km'], 2)"/>
+                            </tr>
+                        </table>
+
+                        <!-- العربيات -->
+                        <h4>أكتر العربيات رحلات</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>العربية</th><th>الرحلات</th><th>الكيلومترات</th><th>تكلفة الوقود</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data['top_vehicles']" t-as="r">
+                                    <td t-esc="r['name']"/>
+                                    <td t-esc="r['trips']"/>
+                                    <td t-esc="fmt(r['km'])"/>
+                                    <td t-esc="fmt(r['fuel'])"/>
+                                </tr>
+                                <tr t-if="not data['top_vehicles']"><td colspan="4">لا توجد بيانات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- السواقين -->
+                        <h4>أكتر السواقين شغلاً</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>السائق</th><th>الرحلات</th><th>الكيلومترات</th><th>الركاب</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data['top_drivers']" t-as="r">
+                                    <td t-esc="r['name']"/>
+                                    <td t-esc="r['trips']"/>
+                                    <td t-esc="fmt(r['km'])"/>
+                                    <td t-esc="r['passengers']"/>
+                                </tr>
+                                <tr t-if="not data['top_drivers']"><td colspan="4">لا توجد بيانات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- الصيانة -->
+                        <h4>الصيانة الشهرية (التكلفة حسب العربية)</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>العربية</th><th>عدد الصيانات</th><th>التكلفة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data['top_maint']" t-as="r">
+                                    <td t-esc="r['name']"/>
+                                    <td t-esc="r['count']"/>
+                                    <td><t t-esc="fmt(r['cost'])"/> <t t-esc="currency"/></td>
+                                </tr>
+                                <tr t-if="not data['top_maint']"><td colspan="3">لا توجد بيانات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <h4>تكلفة الصيانة حسب النوع</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>النوع</th><th>التكلفة</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="data['maint_types']" t-as="r">
+                                    <td t-esc="r['name']"/>
+                                    <td><t t-esc="fmt(r['cost'])"/> <t t-esc="currency"/></td>
+                                </tr>
+                                <tr t-if="not data['maint_types']"><td colspan="2">لا توجد بيانات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- الصيانة قبل الاستلام -->
+                        <h4>الصيانة قبل الاستلام</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>العربية</th><th>عدد الفحوصات</th><th>بنود الفحص اللي إجابتها (لا)</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data['top_handover']" t-as="r">
+                                    <td t-esc="r['name']"/>
+                                    <td t-esc="r['count']"/>
+                                    <td t-esc="r['failed']"/>
+                                </tr>
+                                <tr t-if="not data['top_handover']"><td colspan="3">لا توجد بيانات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- الوجهات -->
+                        <h4>أكتر الوجهات طلباً</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>الوجهة</th><th>عدد الرحلات</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="data['destinations']" t-as="r">
+                                    <td t-esc="r['name']"/>
+                                    <td t-esc="r['trips']"/>
+                                </tr>
+                                <tr t-if="not data['destinations']"><td colspan="2">لا توجد بيانات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- تنبيهات -->
+                        <h4>تنبيهات الرخص والتأمين</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr><th>النوع</th><th>العربية / السائق</th><th>تاريخ الانتهاء</th><th>الحالة</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data['alerts']" t-as="a">
+                                    <td t-esc="a['kind']"/>
+                                    <td t-esc="a['who']"/>
+                                    <td t-esc="a['date']"/>
+                                    <td>
+                                        <t t-if="a['status'] == 'expired'">منتهية</t>
+                                        <t t-else="">تنتهي خلال <t t-esc="a['days']"/> يوم</t>
+                                    </td>
+                                </tr>
+                                <tr t-if="not data['alerts']"><td colspan="4">لا توجد تنبيهات</td></tr>
+                            </tbody>
+                        </table>
+
+                        <!-- تفاصيل الرحلات -->
+                        <h4 style="page-break-before:always;">تفاصيل رحلات الشهر</h4>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>رقم الرحلة</th><th>التاريخ</th><th>العربية</th>
+                                    <th>السائق</th><th>الوجهة</th><th>الركاب</th>
+                                    <th>كم</th><th>الوقود</th><th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="data['trips']" t-as="trip">
+                                    <td t-esc="trip.name"/>
+                                    <td t-esc="trip.trip_date"/>
+                                    <td t-esc="trip.vehicle_id.display_name"/>
+                                    <td t-esc="trip.driver_id.display_name"/>
+                                    <td t-esc="dest_labels.get(trip.destination)"/>
+                                    <td t-esc="trip.passengers_count"/>
+                                    <td t-esc="fmt(trip.distance)"/>
+                                    <td t-esc="fmt(trip.fuel_total)"/>
+                                    <td t-esc="state_labels.get(trip.state, trip.state)"/>
+                                </tr>
+                                <tr t-if="not data['trips']"><td colspan="9">لا توجد رحلات في هذا الشهر</td></tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report action -->
+    <record id="action_report_vehicle_maintenance" model="ir.actions.report">
+        <field name="name">تقرير الصيانة</field>
+        <field name="model">vehicle.maintenance</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">vehicle_profile.report_vehicle_maintenance_document</field>
+        <field name="report_file">vehicle_profile.report_vehicle_maintenance_document</field>
+        <field name="print_report_name">'صيانة - %s' % (object.vehicle_id.plate_number or '')</field>
+        <field name="binding_model_id" ref="model_vehicle_maintenance"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <!-- Report template -->
+    <template id="report_vehicle_maintenance_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl" style="text-align: right;">
+
+                        <t t-set="months" t-value="{1: 'يناير', 2: 'فبراير', 3: 'مارس', 4: 'أبريل', 5: 'مايو', 6: 'يونيو', 7: 'يوليو', 8: 'أغسطس', 9: 'سبتمبر', 10: 'أكتوبر', 11: 'نوفمبر', 12: 'ديسمبر'}"/>
+
+                        <h2 class="text-center mb-4">
+                            تقرير صيانة شهر
+                            <t t-if="o.maintenance_date">
+                                <span t-esc="months[o.maintenance_date.month]"/>
+                                <span t-esc="o.maintenance_date.year"/>
+                            </t>
+                            للعربية
+                            <span t-field="o.vehicle_id.plate_number"/>
+                        </h2>
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 25%;">رقم العربية</th>
+                                    <td style="width: 25%;"><span t-field="o.vehicle_id.plate_number"/></td>
+                                    <th style="width: 25%;">الموديل</th>
+                                    <td style="width: 25%;"><span t-field="o.vehicle_id.model_name"/></td>
+                                </tr>
+                                <tr>
+                                    <th>تاريخ الصيانة</th>
+                                    <td><span t-field="o.maintenance_date"/></td>
+                                    <th>حالة الصيانة</th>
+                                    <td><span t-field="o.state"/></td>
+                                </tr>
+                                <tr>
+                                    <th>نوع الصيانة</th>
+                                    <td><span t-field="o.maintenance_type"/></td>
+                                    <th>مركز الصيانة</th>
+                                    <td><span t-field="o.maintenance_center"/></td>
+                                </tr>
+                                <tr>
+                                    <th>التكلفة</th>
+                                    <td><span t-field="o.cost"/></td>
+                                    <th>تاريخ الصيانة القادمة</th>
+                                    <td><span t-field="o.next_maintenance_date"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h5 class="mt-4">المشكلة</h5>
+                        <div class="border p-2 mb-3" style="min-height: 60px; white-space: pre-wrap;">
+                            <span t-field="o.problem"/>
+                        </div>
+
+                        <h5>قطع الغيار</h5>
+                        <div class="border p-2 mb-3" style="min-height: 60px; white-space: pre-wrap;">
+                            <span t-field="o.spare_parts"/>
+                        </div>
+
+                        <div class="row mt-5">
+                            <div class="col-12 text-center">التوقيع: ____________________</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+</odoo>
