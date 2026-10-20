@@ -48,12 +48,9 @@
 
     'assets': {
         'web.assets_backend': [
-            'vehicle_profile/static/src/js/trip_dashboard.js',
+            'tourism_company/static/src/js/trip_dashboard.js',
         ],
     },
-
-
-
 
     'installable': True,
     'application': True,
