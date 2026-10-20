@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Tourism company1',
+    'name': 'Tourism company',
     'version': '1.0.0',
     'summary': 'إدارة السيارات والسائقين في شركة السياحة',
     'description': """
@@ -48,9 +48,11 @@
 
     'assets': {
         'web.assets_backend': [
-            'tourism_company/static/src/js/trip_dashboard.js',
+            'vehicle_profile/static/src/js/trip_dashboard.js',
         ],
     },
+
+
 
 
     'installable': True,
