@@ -6,8 +6,8 @@
         <field name="name">تقرير الصيانة</field>
         <field name="model">vehicle.maintenance</field>
         <field name="report_type">qweb-pdf</field>
-        <field name="report_name">vehicle_profile.report_vehicle_maintenance_document</field>
-        <field name="report_file">vehicle_profile.report_vehicle_maintenance_document</field>
+        <field name="report_name">tourism_company.report_vehicle_maintenance_document</field>
+        <field name="report_file">tourism_company.report_vehicle_maintenance_document</field>
         <field name="print_report_name">'صيانة - %s' % (object.vehicle_id.plate_number or '')</field>
         <field name="binding_model_id" ref="model_vehicle_maintenance"/>
         <field name="binding_type">report</field>

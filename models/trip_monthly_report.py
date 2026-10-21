@@ -11,12 +11,12 @@ class TripMonthlyReportWizard(models.TransientModel):
     def action_print(self):
         self.ensure_one()
         return self.env.ref(
-            'vehicle_profile.action_report_trip_monthly'
+            'tourism_company.action_report_trip_monthly'
         ).report_action(self)
 
 
 class ReportTripMonthly(models.AbstractModel):
-    _name = 'report.vehicle_profile.report_trip_monthly'
+    _name = 'report.tourism_company.report_trip_monthly'
     _description = 'التقرير الشهري'
 
     @api.model
